@@ -1,0 +1,47 @@
+OK... this new version (0.7.0) uses plugins.... YEAH!
+
+*** WARNING ***
+
+If you want to write a new plugin, contact me to asign a number to
+it so it wont conflict with others...
+
+*** WARNING ***
+
+This number is requiered for the plugins to work...
+
+Ok... the plugins must have the next functions:
+
+whoami: a function that returns this "plugin number"
+
+mynameis : a function that returns a char pointer to the name of
+	the plugin
+
+initialize_myosd : a function that sets the default values for
+	the osd of your plugin
+
+isitmine : a function that reads a command and 2 arguments, and
+	executes it if it applies to the plugin. if so returns 1,
+	else returns 0.
+
+	This plugin should be able to execute a "stop" command with
+	no arguments that stops the plugin(of course).
+
+	To change the look of the displays, I made a function called
+	control_options that can be found on the "utils.c" file...
+	copy this file if you like it and use it on your plugins
+
+	This function is going to be called a lot, so write it
+	carefully, it is going to start, stop and change the look
+	of your plugin, and is the only contact the user is going to
+	have with your plugin...
+	
+
+The function that does the actual work should be called by a
+pthread(...) call so it won't block the whole program.
+
+anything not correctly defined here, please contact me and check
+the source of the plugins
+
+Now go for it.... contact me if you write a new plugin, and maybe i'll
+include it in the standard dist.
+

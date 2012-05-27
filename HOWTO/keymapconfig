@@ -1,0 +1,134 @@
+#!/usr/bin/wish
+
+wm title . "Keymap Configurator"
+set status "Ready"
+
+entry .status -textvariable status
+button .b1 -text "New Key" -command "new_key"
+button .b2 -text "Edit Key" -command "edit_key"
+button .b3 -text "Delete Key" -command "delete_key"
+button .b4 -text "Load Keymap" -command "load_keymap"
+button .b5 -text "Save Keymap" -command "save_keymap"
+button .b6 -text "Quit" -command "destroy ."
+button .b7 -text "Try this keys" -command "try_keys"
+
+label .keyslabel -text "Current keys: "
+listbox .keys -yscrollcommand ".keysscroll set"
+scrollbar .keysscroll -command ".keys yview"
+
+grid .keyslabel -column 0 -columnspan 3 -row 0 -sticky nsew
+grid .keys -column 0 -rowspan 5 -sticky nsew -row 1
+grid .keysscroll -column 1 -rowspan 5 -row 1 -sticky nsew
+grid .b7 -column 0 -columnspan 2 -row 6 -sticky nsew
+
+grid .b1 -column 2 -row 1 -sticky nsew
+grid .b2 -column 2 -row 2 -sticky nsew
+grid .b3 -column 2 -row 3 -sticky nsew
+grid .b4 -column 2 -row 4 -sticky nsew
+grid .b5 -column 2 -row 5 -sticky nsew
+grid .b6 -column 2 -row 6 -sticky nsew
+
+grid .status -column 0 -row 7 -columnspan 3 -sticky nsew
+
+focus .b1
+
+proc new_key {} {
+	global status keycode keysym where
+	set status "Press a Key"
+	set where "end"
+	set keysym ""
+	set keycode ""
+	.status configure -foreground red
+#	toplevel .getkey
+#	label .getkey.label -text "Press a key here"
+#	pack .getkey.label -fill both -expand 1
+	bind . <KeyPress> {set keycode %k;bind . <KeyPress> {};;get_keysym}
+}
+
+
+proc add_key {} {
+	global status keycode keysym where
+	set status "Ready"
+	.keys insert $where "keycode $keycode = $keysym"
+}
+
+proc delete_key {} {
+	.keys delete active
+}
+
+proc edit_key {} {
+	global status keycode keysym where
+	set where [.keys index active]
+	set lista [split [.keys get active]]
+	set keycode [lindex $lista 1]
+	set keysym [lindex $lista 3]
+	toplevel .edit
+	wm title .edit "Edit Key"
+	label .edit.label -text "Enter the keysym to assign to this keycode"
+	label .edit.keycode -text "Keycode $keycode = "
+	entry .edit.entry -textvariable keysym -width 15
+	button .edit.button -text "OK" -command "delete_key;add_key;destroy .edit"
+	button .edit.button2 -text "Cancel" -command "destroy .edit"
+	bind .edit.entry <Return> "delete_key; add_key; destroy .edit"
+	bind .edit.entry <Escape> "destroy .edit"
+
+	grid .edit.label -sticky nsew -row 0 -columnspan 4
+	grid .edit.keycode .edit.entry .edit.button2 .edit.button -row 1 -sticky nsew
+
+}
+
+proc save_keymap {} {
+	global status
+	set file [tk_getSaveFile]
+	if {![string equal $file ""]} {
+		set id [open $file w]
+
+		for {set i 0} {[expr $i < [.keys index end]]} {incr i} {
+			puts $id [string map {"\{" "" "\}" ""} [.keys get $i]]
+		}
+
+		close $id
+	}
+	set status "Saved keymap in $file"
+}
+
+proc get_keysym {} {
+	global status keycode keysym
+	toplevel .keysym
+	wm title .keysym "Add key"
+	label .keysym.label -text "Enter the keysym to assign\nRecommended: IA1-IA15 or IB1-IB15"
+	entry .keysym.entry -textvariable keysym 
+	button .keysym.button -text "OK" -command "add_key; destroy .keysym"
+	grid .keysym.label -row 0 -columnspan 5 -sticky nsew
+	grid .keysym.entry -row 1 -columnspan 4 -sticky nsew
+	grid .keysym.button -row 1 -columnspan 1 -column 5 -sticky nsew
+	bind .keysym.entry <Return> "add_key ; destroy .keysym"
+	focus .keysym.entry
+	.status configure -foreground black
+	set status "Ready"
+}
+
+proc try_keys {} {
+	global status
+	set id [open tmpfile w+]
+	for {set i 0} {$i < [.keys index end]} {incr i} {
+		puts $id [string map {"\{" "" "\}" ""} [.keys get $i]]
+	}
+	close $id
+	exec xmodmap tmpfile
+}
+
+proc load_keymap {} {
+	global status where
+	.keys delete 0 end
+	set file [tk_getOpenFile]
+	if {$file != ""} {
+		set id [open $file r]
+		while {[gets $id readbuffer] > 0} {
+		.keys insert end $readbuffer
+		}
+		close $id
+		set status "Read $file"
+	}
+}
+

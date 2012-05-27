@@ -1,0 +1,301 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=iso-8859-1">
+	<TITLE></TITLE>
+	<META NAME="GENERATOR" CONTENT="StarOffice/5.2 (Linux)">
+	<META NAME="CREATED" CONTENT="20020623;19034600">
+	<META NAME="CHANGEDBY" CONTENT=" ">
+	<META NAME="CHANGED" CONTENT="20020623;19572700">
+	<STYLE>
+	<!--
+		@page { size: 8.5in 11in; margin-left: 1.25in; margin-right: 1.25in; margin-top: 1in; margin-bottom: 1in }
+		P { margin-bottom: 0.08in }
+		H1 { margin-bottom: 0.08in; font-family: "helvetica", sans-serif; font-size: 16pt }
+		P.cuerpo-de-texto-con-sangría { margin-left: 0.2in }
+	-->
+	</STYLE>
+</HEAD>
+<BODY>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">This is the firs version
+of the Multimedia-X-Keyboard-HOWTO</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">This HOWTO was written by
+Lord Darth Moultak &lt;<A HREF="mailto:moultak@gothicfuneral.zzn.com">moultak@gothicfuneral.zzn.com</A>&gt;</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">The latest version of
+this HOWTO can be found at <A HREF="http://www.sourceforge.net/projects/osdsh">http://www.sourceforge.net/projects/osdsh</A></P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<H1 ALIGN=JUSTIFY STYLE="font-weight: medium; text-decoration: none"><I>How
+to configure the internet keys on your multimedia keyboard, without
+using extra daemons, just X and the window manager you already run.</I></H1>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in; font-weight: medium; text-decoration: none">
+<BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-top: 0.17in; page-break-after: avoid"><FONT FACE="helvetica, sans-serif"><FONT SIZE=4>Introduction:</FONT></FONT></P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">Some time ago,
+manufacturers of computers started shipping their hardware with
+keyboards that had &quot;extra&quot; keys on them, these keys were
+meant to control internet and multimedia features of the system, like
+playing/stoping/pausing cds and MP3's, connecting to the internet,
+starting mail and chat programs, and sleeping or suspending the
+computer, and were marked as such. This is nice, these keyboards look
+nice and they are comfortable to work with, those keys always come in
+handy, but they are a pain to configure in X. This is how I did it.</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-top: 0.17in; page-break-after: avoid"><FONT FACE="helvetica, sans-serif"><FONT SIZE=4>The
+theory:</FONT></FONT></P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">When a key is pressed,
+the keyboard generates a code that the kernel detects, this code is
+known as &quot;keycode&quot;. When X detects a keycode, it looks in a
+table of symbols to see if that keycode means something. The symbols
+are the way the software understands the keys, like TAB, UP, DOWN,
+CTRL, etc...</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">If the keycode does mean
+something, (that is, a symbol is asigned to it) the symbol goes to
+the application that has the keyboard control, like a text editor or
+a game.</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">X comes with a series of
+&quot;keymaps&quot;, (files that contain the keycode-keysym pairs )
+that work for a lot of keyboards, and even with some &quot;Internet
+keys&quot;, but at least for me, the internet keys were dead. So I
+needed a new keymap.</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">Since the normal keys
+already worked fine, I just needed to add the keycode-keysym pairs
+that would make my keys work. To do this there is a utility (also
+part of X) called <I>xmodmap</I>.</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><I>xmodmap</I> reads a
+file or std input for &quot;commands&quot;. The commands are in the
+form of</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P CLASS="cuerpo-de-texto-con-sangr&iacute;a" ALIGN=JUSTIFY>keycode
+$keycode = $keysym</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">where $keycode is the
+actual keycode (the first &quot;keycode&quot; needs to be there).</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">This tells <I>xmodmap</I>
+to assign the specified keysym to that keycode. Since when you log
+out you lose the asignments, you need to load them when you start X. 
+(X automatically loads a keymap from its configuration file) This is
+done adding a line like:</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P CLASS="cuerpo-de-texto-con-sangr&iacute;a" ALIGN=JUSTIFY STYLE="font-style: normal; font-weight: medium; text-decoration: none">
+xmodmap yourkeymap</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">to your .xinitrc or
+.Xsession file</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">Now they get recognized,
+but they dont do anything!!! you say.</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">That is true, any
+software can now recognize the keys, but they are not doing anything
+useful, like starting programs, changing the volume or connecting to
+the internet. We will leave this to the window manager.</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">Most window managers can
+be configured to do something when a key or a combination of keys is
+pressed, like Alt-Tab to switch or cicle the windows, and we are
+going to use this feature to start the programs that will actually do
+something useful.</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">In WindowMaker, the
+configuration utility has a section for this. For blackbox there is a
+program called bbkeys that handles the &quot;keyboard shortcuts&quot;.</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">I can give no advice in
+this part, since each window manager works different, but in the
+documentation of yours, you can get the info you need. Look for
+&quot;keyboard shortcuts&quot; or something like that.</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-top: 0.17in; page-break-after: avoid"><FONT FACE="helvetica, sans-serif"><FONT SIZE=4>The
+practice:</FONT></FONT></P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">Well, lets get our hands
+on this...</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">First, pick up a key (the
+leftmost, the rightmost, the bigger one) of your internet keys. 
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">In an xterm write</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P CLASS="cuerpo-de-texto-con-sangr&iacute;a" ALIGN=JUSTIFY>$ xev</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">you will get a window
+with a square on it. Now press the key you chose.</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">It will read something
+like:</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P CLASS="cuerpo-de-texto-con-sangr&iacute;a" ALIGN=JUSTIFY>KeyPress
+event, serial 19, synthetic NO, window 0x2200001,</P>
+<P CLASS="cuerpo-de-texto-con-sangr&iacute;a" ALIGN=JUSTIFY>    root
+0x27, subw 0x0, time 2565600158, (136,110), root:(350,340),</P>
+<P CLASS="cuerpo-de-texto-con-sangr&iacute;a" ALIGN=JUSTIFY>    state
+0x10, keycode 149 (keysym 0x1000410e, IA14), same_screen YES,</P>
+<P CLASS="cuerpo-de-texto-con-sangr&iacute;a" ALIGN=JUSTIFY>   
+XLookupString gives 0 characters:  &quot;&quot;</P>
+<P CLASS="cuerpo-de-texto-con-sangr&iacute;a" ALIGN=JUSTIFY><BR><BR>
+</P>
+<P CLASS="cuerpo-de-texto-con-sangr&iacute;a" ALIGN=JUSTIFY>KeyRelease
+event, serial 24, synthetic NO, window 0x2200001,</P>
+<P CLASS="cuerpo-de-texto-con-sangr&iacute;a" ALIGN=JUSTIFY>    root
+0x27, subw 0x0, time 2565600304, (136,110), root:(350,340),</P>
+<P CLASS="cuerpo-de-texto-con-sangr&iacute;a" ALIGN=JUSTIFY>    state
+0x10, keycode 149 (keysym 0x1000410e, IA14), same_screen YES,</P>
+<P CLASS="cuerpo-de-texto-con-sangr&iacute;a" ALIGN=JUSTIFY>   
+XLookupString gives 0 characters:  &quot;&quot;</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">now press Ctrl-c  in the
+xterm and look at the third line of each block, there is a keycode in
+decimal (in this case, 149) and a keysym (in this case IA14). Ok, if
+you had not assigned any keysym to your inet keys,  instead of IA14
+you will get something like NoKeysym.</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">The X guys have set aside
+some special keysyms for the inet keys, they go from IA1 to IA15 and
+IB1 to IB15. This gives us a total of 30 keysyms. This has to be
+enough for any keyboard.</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">write a file &quot;yourkeymap&quot;
+that reads 
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P CLASS="cuerpo-de-texto-con-sangr&iacute;a" ALIGN=JUSTIFY>keysym
+149 = IA14</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">(change the values
+acording with what you got, if you got a NoKeysym, choose a keysym
+from the ones mentioned above, IA1 looks nice for a start)</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">now from the xterm do:</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P CLASS="cuerpo-de-texto-con-sangr&iacute;a" ALIGN=JUSTIFY STYLE="font-style: normal">
+$ xmodmap yourkeymap</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">and repeat the thing with
+<I>xev</I>. Start it and press the key you pressed before. You will
+get a similar output, but instead of the NoKeysym you will get the
+keysym you wrote in your file.</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">Add a line for each key
+you want to configure. Don't repeat keysyms (unless you want several
+keys to do the exact same thing). Reload your keymap with:</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P CLASS="cuerpo-de-texto-con-sangr&iacute;a" ALIGN=JUSTIFY STYLE="font-style: normal">
+$ xmodmap yourkeymap</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">Now copy the yourkeymap
+file to ~/.yourkeymap.</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">Edit your ~/.xinitrc or
+~/.Xsession file to add a line that says:</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P CLASS="cuerpo-de-texto-con-sangr&iacute;a" ALIGN=JUSTIFY STYLE="font-style: normal">
+xmodmap ~/.yourkeymap</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">This is done to load the
+keys when you start X.</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">Instead of doing all
+this, you may want to check my program &quot;keymapconfig&quot; that
+asks you to press a key and then asks you for the keysym to asign to
+it. You can save this pairs to a file and load them later with
+<I>xmodmap</I>... It requieres Tcl/Tk. Try to use only the keysyms
+specified above (IA1 to IA15  and IB1 to IB15) to avoid conflicts and
+problems. Anyway 30 keys are more than enough for internet and
+multimedia stuff.</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">(You have already
+downloaded this program, with this howto, look in the directory where
+you untarred the tarball)</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">You still have to add
+that line in your .xinitrc or .Xsession to load your keymap when you
+start X.</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">Now you have to configure
+the applications that do the work. This is configuration of your
+window manager, and each window manager will have different
+instructions, but most of them will work.</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">Basically, when asked for
+the key to watch (or &#147;keyboard shortcut&#148;), just write the
+keysym you asigned to the key you want to do something (or press that
+key, the &#147;Key&#148; is in fact the keysym, not actually the key)
+and then write the command you want to run when you press that key.</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">You can also use these
+keys in combination with modifiers like Ctrl, Shift and Alt. For
+example, I use the &quot;Play&quot; key to start xmms, but if I want
+to play a CD, I use Ctrl-Play to start gcd; for me Play is IB3 so I
+configured Ctrl-IB3 to start gcd. I also use the &quot;Suspend&quot;
+key to suspend the computer by running &quot;apm -s&quot;, but if I
+want to see the battery status, I use Ctrl-Sleep to run &quot;osdctl
+-A 3&quot;, that displays the battery status using osdsh (Read
+below). Again, for me &quot;Suspend&quot; is IA5, so to run &quot;apm
+-s&quot; I asigned the key IA5 and to run &quot;osdctl -A 3&quot; I
+asigned Ctrl-IA5.</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">For volume control, I
+recommend using umix, for terminals aterm is nice and for the
+&quot;Connect&quot; key, put the command you use to connect. Its that
+simple.</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in">As an adition, you may
+want to check osdsh (by me of course), its a daemon that monitors the
+sound card volume, battery and connection status, displays a clock
+and displays it all using the XOSD library, so you get a nice TV-like
+On-Screen-Display for your sound, batt, connection and a sexy clock
+floating unmanaged on your display.</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><BR>
+</P>
+<P ALIGN=JUSTIFY STYLE="margin-bottom: 0in"><A HREF="http://www.sourceforge.net/projects/osdsh">http://www.sourceforge.net/projects/osdsh</A></P>
+</BODY>
+</HTML>

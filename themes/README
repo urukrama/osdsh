@@ -1,0 +1,13 @@
+This directory contains sample script files for osdsh and osdctl.
+These scripts or themes can be run thru osdctl or piped to the fifo of osdsh.
+
+testscript: a simple theme, using the "fixed" font. Enables everything.
+
+biggerfonts: just as testscript, but using the "helvetica" font in a bigger
+	size.
+
+welcome: Adjust this script to a font that exists on your system.
+	This is a presentation/demo of osdsh.
+
+To try these scripts do:
+	$ osdctl -S script

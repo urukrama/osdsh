@@ -1,0 +1,247 @@
+#!/usr/bin/wish
+
+wm title . "osdSH configuration tool"
+
+menu .menu
+
+menu .menu.osd
+.menu.osd add checkbutton -variable settings -onvalue Mixer -label "Mixer" -command {configure_osd smix}
+.menu.osd add checkbutton -variable settings -onvalue Connection -label "Connection" -command {configure_osd sppp }
+.menu.osd add checkbutton -variable settings -onvalue Clock -label "Clock" -command {configure_osd sclk}
+.menu.osd add checkbutton -variable settings -onvalue Battery -label "Battery" -command {configure_osd sapm}
+.menu.osd add checkbutton -variable settings -onvalue Main -label "Main" -command {configure_osd dset}
+
+menu .menu.file
+.menu.file add command -label "Load theme..." -command load_theme
+.menu.file add command -label "Save Theme as..." -command save_theme
+.menu.file add command -label "Try this theme" -command {save_theme $fifofile}
+.menu.file add command -label "Quit" -command "destroy ."
+
+.menu add cascade -label "File" -menu .menu.file
+.menu add cascade -label "Configure" -menu .menu.osd
+
+. configure -menu .menu
+
+set settings Main
+
+foreach a {dset sppp sclk sapm smix} {
+	frame .$a
+
+	label .$a.title -textvariable settings
+	grid .$a.title -row 0 -column 0 -columnspan 2 -sticky nsew
+
+	array set $a {
+		delay "5"
+		color "green"
+		font "fixed"
+		xoffset "0"
+		yoffset "0"
+		xside "Left"
+		yside "Top"
+		shad "0"
+		extra ""
+		extra2 ""
+		extra3 ""
+		extra4 ""
+		extra5 ""
+		extra6 ""
+		active 0
+	}
+
+	checkbutton .$a.active -variable $a\(active) -text "Active"
+	grid .$a.active -row 0 -column 2 -columnspan 2 -sticky nsew
+
+	label .$a.delay -text "Delay:"
+	label .$a.color -text "Color:"
+	label .$a.font -text "Font:"
+	label .$a.xpos -text "X side:"
+	label .$a.xoff -text "X distance:"
+	label .$a.ypos -text "Y edge:"
+	label .$a.yoff -text "Y distance:"
+	label .$a.shad -text "Shadow offset:"
+	
+	grid .$a.delay -row 1 -column 0 -sticky nsew
+	grid .$a.color -row 2 -column 0 -sticky nsew
+	grid .$a.font -row 3 -column 0 -sticky nsew
+	grid .$a.shad -row 4 -column 0 -sticky nsew
+	grid .$a.xpos -row 1 -column 2 -sticky nsew
+	grid .$a.xoff -row 2 -column 2 -sticky nsew
+	grid .$a.ypos -row 3 -column 2 -sticky nsew
+	grid .$a.yoff -row 4 -column 2 -sticky nsew
+
+	entry .$a.delayent -textvariable $a\(delay)
+	entry .$a.colorent -textvariable $a\(color)
+	entry .$a.fontent -textvariable $a\(font)
+	entry .$a.shadent -textvariable $a\(shad)
+	entry .$a.xoffent -textvariable $a\(xoffset)
+	entry .$a.yoffent -textvariable $a\(yoffset)
+	tk_optionMenu .$a.xside $a\(xside) Left Center Right
+	tk_optionMenu .$a.yside $a\(yside) Top Bottom
+	
+	grid .$a.delayent -row 1 -column 1 -sticky nsew
+	grid .$a.colorent -row 2 -column 1 -sticky nsew
+	grid .$a.fontent -row 3 -column 1 -sticky nsew
+	grid .$a.shadent -row 4 -column 1 -sticky nsew
+	grid .$a.xside -row 1 -column 3 -sticky nsew
+	grid .$a.xoffent -row 2 -column 3 -sticky nsew
+	grid .$a.yside -row 3 -column 3 -sticky nsew
+	grid .$a.yoffent -row 4 -column 3 -sticky nsew
+	
+}
+
+set sclk(extra) "%H:%M:%S"
+label .sclk.formatlab -text "Clock format:"
+entry .sclk.format -textvariable sclk(extra)
+grid .sclk.formatlab -row 5 -column 0 -columnspan 2 -sticky nsew
+grid .sclk.format -row 5 -column 2 -columnspan 2 -sticky nsew
+
+set sppp(extra) ppp0
+label .sppp.devicelab -text "PPP Interface:"
+entry .sppp.deviceent -textvariable sppp(extra)
+label .sppp.connectinglab -text "Connecting string"
+entry .sppp.connecting1 -textvariable sppp(extra2)
+entry .sppp.connecting2 -textvariable sppp(extra3)
+label .sppp.connectedlab -text "Connected string"
+entry .sppp.connected1 -textvariable sppp(extra4)
+entry .sppp.connected2 -textvariable sppp(extra5)
+label .sppp.disconnectedlab -text "Disconnect string"
+entry .sppp.disconnected -textvariable sppp(extra6)
+grid .sppp.devicelab -row 0 -column 4 -sticky nsew
+grid .sppp.connectinglab -row 1 -column 4 -sticky nsew
+grid .sppp.connectedlab -row 3 -column 4 -sticky nsew
+grid .sppp.disconnectedlab -row 5 -column 4 -sticky nsew
+grid .sppp.deviceent -row 0 -column 5 -sticky nsew
+grid .sppp.connecting1 -row 1 -column 5 -sticky nsew
+grid .sppp.connecting2 -row 2 -column 5 -sticky nsew
+grid .sppp.connected1 -row 3 -column 5 -sticky nsew
+grid .sppp.connected2 -row 4 -column 5 -sticky nsew
+grid .sppp.disconnected -row 5 -column 5 -sticky nsew
+
+
+
+
+proc configure_osd {osd} {
+	global fifofile
+
+	set fifo [open $fifofile w+]
+
+	puts $fifo $osd\(d,-1\)
+
+	close $fifo
+
+	grid forget .smix .sppp .sapm .sclk .dset
+	grid .$osd -column 0 -row 1 -columnspan 2
+
+}
+
+proc load_theme {} {
+	global smix sppp sapm sclk dset
+	set file [tk_getOpenFile]
+	if {$file == ""} {} else {
+		set id [open $file r]
+		while {[gets $id readbuf] >= 0} {
+			set separate [split $readbuf \(|,|\)]
+			set command  [lindex $separate 0]
+			set option   [lindex $separate 1]
+			set argument [lindex $separate 2]
+			switch $option {
+				C {set option color}
+				f {set option font}
+				d {set option delay}
+				x {set option xoffset}
+				y {set option yoffset}
+				t {set option yside;set argument Top}
+				b {set option yside;set argument Bottom}	
+				l {set option xside;set argument Left}
+				c {set option xside;set argument Center}
+				r {set option xside;set argument Right}
+				o {set option shad}
+			}
+			switch $command {
+				mixr {set command smix
+				     set argument $option
+				     set option active}
+				clck {set command sclk
+				     set argument $option
+				     set option active}
+				apmw {set command sapm
+				     set argument $option
+				     set option active}
+				pppw {set command sppp
+				     set argument $option
+				     set option active}
+				clkf {set command sclk
+				     set argument $option
+				     set option extra}
+				pdev {set command sppp
+				     set argument $option
+				     set option extra}
+				connecting {set command sppp
+				     set sppp(extra2) $option	
+				     set option extra3}
+				connected {set command sppp
+				     set sppp(extra4) $option
+				     set option extra5}
+				disconnected {set command sppp
+				     set argument $option
+				     set option extra6}
+			}
+			set $command\($option) $argument
+		}
+		close $id				
+	}
+}
+
+proc save_theme {args} {
+	if {[lindex $args 0]==""} {
+		set file [tk_getSaveFile]
+	} else {
+		set file [lindex $args 0]
+	}
+
+	if {$file == ""} {} else {
+		set id [open $file w]
+		puts $id "#This osdsh theme was created for osdsh-0.6.0"
+		puts $id "#with Tkosdshconfig, by Lord Darth Moultak"
+		foreach a {dset smix sppp sapm sclk} {
+			global $a
+			puts $id $a\(d\,[expr \$$a\(delay)])
+			puts $id $a\(f\,[expr \$$a\(font)])
+			puts $id $a\(C\,[expr \$$a\(color)])
+			puts $id $a\(o\,[expr \$$a\(shad)])
+			puts $id $a\(x\,[expr \$$a\(xoffset)])
+			puts $id $a\(y\,[expr \$$a\(yoffset)])
+			if {[expr \$$a\(xside)=="Right"]} {	
+				puts $id $a\(r)
+			} else {
+			    if {[expr \$$a\(xside)=="Center"]} {
+				puts $id $a\(c)
+			    } else {
+				puts $id $a\(l)
+			    }
+			}
+
+			if {[expr \$$a\(yside)=="Bottom"]} {
+				puts $id $a\(b)
+			} else {
+				puts $id $a\(t)
+			}
+		}
+		puts $id "pdev($sppp(extra))"
+		puts $id "clkf($sclk(extra))"
+		puts $id "clck($sclk(active))"
+		puts $id "mixr($smix(active))"
+		puts $id "apmw($sapm(active))"
+		puts $id "pppw($sppp(active))"
+		puts $id "connecting($sppp(extra2),$sppp(extra3))"
+		puts $id "connected($sppp(extra4),$sppp(extra5))"
+		puts $id "disconnected($sppp(extra6),)"
+
+		close $id
+	}
+}
+
+set uid [exec id -u]
+set fifofile /tmp/osdsh.$uid
+
+configure_osd dset

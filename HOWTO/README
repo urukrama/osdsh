@@ -1,0 +1,26 @@
+Keymapconfig README
+
+What is this?
+
+	keymapconfig is a Tcl/Tk script that generates keymaps to be loaded
+into the X window sistem thru the utility called xmodmap.
+
+	keymapconfig reads the keycode of a key and asks for a keysym t
+be assigned to it. It can save the keycode-keysym pairs to a file that
+can be then feed to xmodmap, and can run xmodmap itself to try the keys
+
+	It also can load these files to edit them.
+
+	Read the manual pages of xmodmap to understand this.
+
+
+	The reason I wrote this is that I needed a tool to grab the keycodes
+of the internet keys on my multimedia keyboard, this can be done with the
+utility "xev" that is part of X, but I also needed to edit the keysyms and
+assign them to keycodes, so after doing it manually a few times, I wrote this
+program so other people can get their multimedia keys working.
+I also did it as a tool for my Multimedia-X-Keyboard-HOWTO.
+
+Installation
+
+	Just copy it somewhere in your path. It needs Tcl/Tk.

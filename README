@@ -1,0 +1,353 @@
+
+COPYRIGHT
+
+   Copyright 2002 Lord Darth Moultak
+   
+   <moultak@gothicfuneral.zzn.com>
+   All rights reserved.
+   
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or (at
+   your option) any later version.
+   
+   This program is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+   General Public License for more details.
+   
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+   USA
+     _________________________________________________________________
+
+This program needs:
+	*XOSD 2.0.1
+	*libapm..... (check your distro for this...)
+	*pthreads... (this one in your distro too)
+
+
+What is this:
+
+	osdsh is a program based on osdd-0.0.2 by Michael Petullo
+<osdd@flyn.org>,osdclock-0.5 by Jon Beckham <leftorium@leftorium.net> and
+Martijn van de Streek <martijn@foodfight.org>, a nice utility named ppptime-0.9
+written by Justin Azoff, and uses the xosd-2.0.1 library by Andre Renaud
+<andre@ignavus.net>. Thank you guys!!.
+
+	osdsh is a daemon that reads from your mixer device and shows
+the volume of the sound card when it changes, can show a clock, independent
+of the mixer watch, tell you if you are connected, and your battery status.
+	In adition, you can type "commands" to a fifo and they will get
+"executed", the plans are that it will support  battery status,
+and anything you want. You can also change the color, font and position of the
+different displays when running.  
+
+How do I use it?
+
+	Just run it from the command line, and change the volume of your sound
+card, you should see a bar showing the current volume for that device
+You can display strings, sliders and bars on the screen by using
+the complement program "osdctl", or by echoing commands to the fifo file
+(/tmp/osdsh.x, x= your uid).
+
+	*** NOTICE ***
+	Starting with 0.5.0, you need to activate each of the displays
+before it starts working. To activate the mixer do a "osdctl -m 1".
+
+This is some stuff you can do with osdsh, I show the commands used
+by osdctl so you can add them to your scripts:
+
+**In this examples we will call "uid" to your numeric uid.**
+
+To display a string into the screen, you can do a
+
+$echo "strn(firstline,secoundline)" > /tmp/osdsh.uid
+or
+$osdctl -s "firstline,secounline"
+
+It is a good thing to alwawy specify both arguments, so you
+get the results you want, it doesn't matter that one line
+is empty. If you don't do this, you will end up with a
+screwed display... try it.
+
+To display a bar named BAR full up to 50%:
+
+$echo "bars(BAR,50)" > /tmp/osdsh.uid
+or
+$osdctl -b "BAR,50"
+
+To display a slider named SLIDER at 25%:
+
+$echo "slid(SLIDER,25)" > /tmp/osdsh.uid
+or
+$osdctl -l "SLIDER,25"
+
+To activate the osd clock:
+
+$echo "clck(1)" > /tmp/osdsh.uid
+or
+$osdctl -c 1
+
+To deactivate it use 0 instead of 1
+
+To activate the mixer watch:
+
+$echo "mixr(1)" > /tmp/osdsh.uid
+or
+$osdctl -m 1
+
+To deactivate it, use 0, mixer watch is
+activated by default.
+
+To activate the ppp watch:
+$echo "pppw(1)" > /tmp/osdsh.uid
+or
+$osdctl -p 1 (0 to deactivate).
+
+This will display "Connecting..."
+until connected (it wont check if you
+are actually connecting, just will say it,
+its up to you to start your connection script).
+
+*** This has changes... a bit. Now you can configure
+the phrase that osdsh says when its still connecting. Change it
+using the "connecting(firstline,secoundline)" command.
+
+Also change the "Connected" phrase with "connected(firstline,secoundline)"
+and the disconnected phrase with "disconnected(firslineonly)". On the secound
+line it will say "Disconnected after %d hr %d min %d secs" telling the time
+you were connected.
+*** End of this note.
+
+To change the ppp interface
+(defaults to ppp0)
+$echo "pdev(pppx)" > /tmp/osdsh.uid
+to watch the connection thru pppx.
+or
+$osdctl -d pppx
+Do this before you tell osdsh to check the connection.
+
+To show the battery status
+$echo "apmw(1)" > /tmp/osdsh.uid
+or
+$osdctl -a 1 (0 to hide)
+
+or to show it for five seconds
+$echo "apms(5)" > /tmp/osdsh.uid
+or
+$osdctl -A 5
+
+How do I change the looks of the OSD?
+
+	You can change the look of the osd when osdsh is running, to do this
+you have a set of commands that are not currently supported as command line
+options for osdctl, but can be used thru osdctl anyway, this commands will be
+discussed later. 
+
+	An important note, each of the "watching processes" has its own display,
+maybe you like your clock to float on the top of the screen with a nice green
+color and a matrix-esque font, but you want the mixer volume to be displayed
+at the bottom in light blue with a bold font, the connection status has to be
+yellow and appear just below the clock, and in a big annoying font so you notice
+it..... well you can have it. Each of the "displays" has its own configuration,
+but when you start osdsh, the options given in the command line are set for all
+of the displays, except the mixer, that always starts at the bottom (you can 
+change it later).
+
+To change the font to helvetica:
+$echo "dset(f,helvetica)" > /tmp/osdsh.uid
+or
+$osdctl -e "dset(f,helvetica)"
+
+To change the color to white:
+$echo "dset(C,white)" > /tmp/osdsh.uid
+or
+$osdctl -e "dset(C,white)"
+
+To display a shadow with an offset of 2:
+$echo "dset(o,2)" > /tmp/osdsh.uid
+or
+$osdctl "dset(o,2)"
+
+To turn the shadow off
+$echo "dset(o,0)" > /tmp/osdsh.uid
+or
+$osdctl -e "dset(o,0)"
+
+To display the strings, bars and sliders on the bottom of the screen:
+$echo "dset(b)" > /tmp/osdsh.uid
+or
+$osdctl -e "dset(b)"
+
+To put it back on the top of the screen:
+$echo "dset(t)" > /tmp/osdsh.uid
+or
+$osdctl -e "dset(t)"
+
+To terminate the osdsh process:
+$echo "exit()" > /tmp/osdsh.uid
+or
+$osdctl -x
+
+What will come:
+
+	Maybe we could make a nice HUD like status bar, like the ones in the
+first person shooting games like doom or quake, where you can see the batt,
+time, connection status and speed, volume, and other stuff, floating on your
+screen, and going away when not wanted, but for this its necessary that xosdlib
+supports some other features, like x and y offset, or a geometry like option,
+or maybe the ability to have different fonts and colors on the same display...
+
+	A look on it wouldn't hurt anyway, but osdsh and osdctl as they are
+now are A LOT nicer than anything I have seen( and to me, useful)but it takes
+more than a nice quake-like hud on my desktop to get off my butt and start
+hacking the xosdlib...(ok no, but I have to do some research, and it may take
+some time)
+
+	*** Already looked into xosd, and hacked it. We now support the
+x coordinate. Change it with "yourdisplaysetcommand(x,value)". Of course, we
+also can count from right-to-left or left-to-right, to your choice
+
+*** Looked into xosd again... and they finally got the X-offset clue, so we
+now support XOSD again, not our own library. the requiered version of XOSD
+is 2.0.1.
+
+Yeah, right but, how do I compile it?
+
+First, edit the Makefile and the config.h files, or at least read them.
+
+Then:
+
+$make
+
+	Copy the binaries to where you like them, osdctl is not requiered,
+but recommended, since it detects your uid and puts the commands right where
+they belong, and gets some command line options to do its bussiness.
+
+Or you can do a:
+
+$make install
+
+
+OSDSH commands.
+
+	osdctl is the complement program of osdsh, osdctl is an interface to
+the control shell of osdsh, and support several command line options to do some
+stuff, like "-s" to display a string, with osdctl you dont have to know your
+uid, since the program checks for it.
+
+	osdctl can give osdsh commands directly, with the flag "-e" you can
+type a command that is not yet supported by an option.
+
+	There are several commands that are not supported yet by osdctl in the
+form of command line options, currently the ones that change the look of the
+display. This commands are:
+
+	-dset: stands for "display set", it will change the look of the main
+		display, that is, the one that is used to display strings,
+		bars, and sliders .
+
+	-smix: stands for "set mixer", the same that dset, but for the mixer
+		display.
+
+	-sclk: stands for "set clock", just as above, for the clock display.
+
+	-sppp: stands for "set ppp", for the ppp display.
+
+	-sapm: "set apm", the battery status display
+
+	Each one of this commands support several options to change the look of
+the displays. This options are:
+
+	-f fontstring: changes the font of the selected display to "fontstring"
+
+	-C color: changes the color of the display to "color"
+
+	-t : stands for top, show the selected display on the top of the screen.
+
+	-b : stands for bottom, display in the bottom of the screen.
+
+	-l : stands for left, display to the left of the screen.
+
+	-c : to center the display in the screen
+
+	-r : stands for right, display to the right of the screen.
+
+	-d delay: changes the time the info will be displayed to "delay" secs.
+
+	-o soffset: changes the distance in pixels that the shadow of the
+		display is throw away, 0 for no shadow, (default).
+
+	-y offset: changes the distance from the top or the bottom of the
+		screen at wich the display is shown.
+	-x offset: changes the distance from the left or right of the screen
+		at wich the display is shown. It is measured from the left edge
+		of the display to the left or right edge of the screen.
+
+
+Well, the way to give the commands to osdsh thru osdctl is as follows:
+
+To change the color of the mixer to white:
+
+$osdctl -e "smix(C,white)" 
+
+Just as above, the fifo file can be used directly.
+Note that osdctl can get several commands, but that is not really
+tested.
+
+You can do a
+$osdctl -c 1 -m 1 -e "dset(C,yellow)" -s "hello, world"
+
+	To activate the clock and mixer, and display "hello, world" in yellow
+Do the same for other commands and options to get the look you want.
+
+	There is another command that is used to change the format of the clock.
+This is used like this:
+
+$osdctl -e "clkf(%H:%M:%S)"
+
+The format is the regular strftime string.
+
+To finish, the commands supported by osdsh are:
+
+strn(firstline,secound)	: display a string
+bars(name,number)	: display a bar with a label
+slid(name,number)	: display a slider with a label
+time(n)		: display the clock for n seconds
+apms(n)		: display the apm monitor for n seconds
+sleep(n)		: sleep for n seconds
+clck(1|0)		: (de)activate the clock
+mixr(1|0)		: (de)activate the mixer monitor (sound card)
+apmw(1|0)		: (de)activate the apm monitor
+pppw(1|0)		: (de)activate the connection monitor
+exit()			: causes osdsh to exit.
+dset(option,value)	: configure the main display
+smix(option,value)	: configure the mixer display
+sclk(option,value)	: configure the clock display
+sppp(option,value)	: configure the ppp display
+sapm(option,value)	: configure the apm display
+pdev(pppdevice)		: change the ppp interface (ppp0 by default)
+clkf(strftimestring)	: change the format of the clock in the strftime format.
+connecting(firs,secound): Change the "Connecting..." prase while connecting.
+connected(fisrt,secound): Change the "Connected" phrase when connected.
+disconnected(firstline) : Change the first line phrase when disconnected.
+showconntime()		: Shows the time you have been connected.
+
+And for your theme-ing delight, you can make osdctl run scripts to osdsh.
+The scripts can have comments (anything not recognized by osdsh is just ignored)
+and they consist of osdsh commands and arguments, one command per line.
+There is a test script in the data dir, (named testscript of course) to show
+what I mean.
+
+osdctl executes scripts with the "-S" flag, see the osdctl help.
+
+*** Note: now included with osdSH, I included a Tcl/Tk script to automate
+the process of configuring themes for osdSH. Check examples in the "themes" directory.
+"tkosdshconfig" will read themes and save them to files. You can load them to osdSH using:
+
+	$ osdctl -S yourthemefile
+
+The End
+
